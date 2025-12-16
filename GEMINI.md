@@ -10,13 +10,17 @@ This project is a modern, web-based rewrite of the original Finplan application.
 
 *   **Language:** TypeScript
 *   **Frontend Framework:** React (bootstrapped with Vite)
-*   **UI Library:** Material UI (MUI) v6
-*   **Routing:** React Router v7
+*   **UI Library:** Material UI (MUI) v7.3.6
+*   **Routing:** React Router v7 (Framework mode)
 *   **Backend / Platform:** Firebase
-    *   **Hosting:** Static asset hosting.
+    *   **Hosting:** Firebase Hosting for web hosting.
     *   **Authentication:** Firebase Auth (optional, for user management).
-    *   **Database:** Firestore (NoSQL) for storing trades, user profiles, and holdings.
+    *   **Database:** Cloud Firestore for database.
+    *   **Storage:** Firebase Storage for storing any files.
     *   **Functions:** Firebase Cloud Functions (if server-side processing for Kite API integration is needed).
+    *   **MCP:** Firebase MCP is available in the project which can be utilised when needed.
+*   **Tools:**
+    *   **MUI MCP:** The MCP server for MUI can be started using `npx -y @mui/mcp@latest`.
 
 ## Architecture
 
@@ -204,8 +208,8 @@ export interface Trade {
 
 1.  **Initialize Project:**
     ```bash
-    npm create vite@latest finplan-web -- --template react-ts
-    cd finplan-web
+    npm create vite@latest ai-financial-planner -- --template react-ts
+    cd ai-financial-planner
     npm install
     ```
 
