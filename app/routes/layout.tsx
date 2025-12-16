@@ -14,6 +14,11 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  type SelectChangeEvent,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -22,6 +27,8 @@ import {
   Public as GlobeIcon,
   AccountBalance as BankIcon,
 } from '@mui/icons-material';
+import { SelectionProvider, useSelection } from '../context/SelectionContext';
+import { DataService } from '../services/data.service';
 
 const drawerWidth = 240;
 
@@ -29,14 +36,20 @@ interface Props {
   window?: () => Window;
 }
 
-export default function AppLayout(props: Props) {
+function LayoutContent(props: Props) {
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedMemberId, setSelectedMemberId } = useSelection();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleMemberChange = (event: SelectChangeEvent) => {
+    const value = event.target.value;
+    setSelectedMemberId(value === '' ? null : value);
   };
 
   const menuItems = [
@@ -49,17 +62,17 @@ export default function AppLayout(props: Props) {
   const drawer = (
     <div>
       <Toolbar>
-         <Typography variant="h6" noWrap component="div">
-            FinPlan
-          </Typography>
+        <Typography variant="h6" noWrap component="div">
+          FinPlan
+        </Typography>
       </Toolbar>
       <Divider />
       <List>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton 
-                onClick={() => navigate(item.path)}
-                selected={location.pathname === item.path}
+            <ListItemButton
+              onClick={() => navigate(item.path)}
+              selected={location.pathname === item.path}
             >
               <ListItemIcon>
                 {item.icon}
@@ -94,9 +107,27 @@ export default function AppLayout(props: Props) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             AI Financial Planner
           </Typography>
+          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <Select
+              value={selectedMemberId || ''}
+              onChange={handleMemberChange}
+              displayEmpty
+              inputProps={{ 'aria-label': 'Select Member' }}
+              sx={{ color: 'white', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' }, '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' }, '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' }, '.MuiSvgIcon-root': { color: 'white' } }}
+            >
+              <MenuItem value="">
+                <em>Family</em>
+              </MenuItem>
+              {DataService.getMembers().map((member) => (
+                <MenuItem key={member.id} value={member.id}>
+                  {member.displayName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Toolbar>
       </AppBar>
       <Box
@@ -138,5 +169,13 @@ export default function AppLayout(props: Props) {
         <Outlet />
       </Box>
     </Box>
+  );
+}
+
+export default function AppLayout(props: Props) {
+  return (
+    <SelectionProvider>
+      <LayoutContent {...props} />
+    </SelectionProvider>
   );
 }

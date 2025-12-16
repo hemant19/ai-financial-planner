@@ -1,23 +1,11 @@
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
-
-function createData(
-  name: string,
-  symbol: string,
-  quantity: number,
-  avgPrice: number,
-  currentPrice: number,
-) {
-  return { name, symbol, quantity, avgPrice, currentPrice };
-}
-
-const rows = [
-  createData('Apple Inc.', 'AAPL', 50, 150, 175),
-  createData('Microsoft Corp', 'MSFT', 30, 280, 420),
-  createData('Alphabet Inc.', 'GOOGL', 40, 120, 160),
-  createData('NVIDIA Corp', 'NVDA', 10, 400, 900),
-];
+import { useSelection } from '../context/SelectionContext';
+import { DataService } from '../services/data.service';
 
 export default function USStocks() {
+  const { selectedMemberId } = useSelection();
+  const holdings = DataService.getHoldings(selectedMemberId).filter(h => h.assetClass === 'US_EQUITY' || h.currency === 'USD');
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -36,9 +24,9 @@ export default function USStocks() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {holdings.map((row) => (
               <TableRow
-                key={row.name}
+                key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
@@ -46,9 +34,9 @@ export default function USStocks() {
                 </TableCell>
                 <TableCell align="right">{row.symbol}</TableCell>
                 <TableCell align="right">{row.quantity}</TableCell>
-                <TableCell align="right">{row.avgPrice}</TableCell>
-                <TableCell align="right">{row.currentPrice}</TableCell>
-                <TableCell align="right">{(row.quantity * row.currentPrice).toLocaleString()}</TableCell>
+                <TableCell align="right">{row.averagePrice.toLocaleString()}</TableCell>
+                <TableCell align="right">{row.lastPrice?.toLocaleString()}</TableCell>
+                <TableCell align="right">{(row.quantity * (row.lastPrice || 0)).toLocaleString()}</TableCell>
               </TableRow>
             ))}
           </TableBody>

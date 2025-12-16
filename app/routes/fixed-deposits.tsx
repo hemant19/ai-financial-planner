@@ -1,27 +1,17 @@
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
-
-function createData(
-  bankName: string,
-  amount: number,
-  rate: number,
-  maturityDate: string,
-) {
-  return { bankName, amount, rate, maturityDate };
-}
-
-const rows = [
-  createData('HDFC Bank', 100000, 7.5, '2025-05-15'),
-  createData('SBI', 250000, 7.2, '2026-01-20'),
-  createData('ICICI Bank', 150000, 7.4, '2024-11-30'),
-];
+import { useSelection } from '../context/SelectionContext';
+import { DataService } from '../services/data.service';
 
 export default function FixedDeposits() {
+  const { selectedMemberId } = useSelection();
+  const fixedDeposits = DataService.getFixedDeposits(selectedMemberId);
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
         Fixed Deposits
       </Typography>
-      <TableContainer component={Paper}>
+       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -32,16 +22,16 @@ export default function FixedDeposits() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {fixedDeposits.map((row) => (
               <TableRow
-                key={row.bankName + row.maturityDate}
+                key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
                   {row.bankName}
                 </TableCell>
-                <TableCell align="right">{row.amount.toLocaleString()}</TableCell>
-                <TableCell align="right">{row.rate}%</TableCell>
+                <TableCell align="right">{row.principalAmount.toLocaleString()}</TableCell>
+                <TableCell align="right">{row.interestRate}%</TableCell>
                 <TableCell align="right">{row.maturityDate}</TableCell>
               </TableRow>
             ))}

@@ -6,5 +6,6 @@ export default [
     route("indian-equities", "routes/indian-equities.tsx"),
     route("us-stocks", "routes/us-stocks.tsx"),
     route("fixed-deposits", "routes/fixed-deposits.tsx"),
+    route("onboarding", "routes/onboarding.tsx"), // New onboarding route
   ]),
 ] satisfies RouteConfig;
