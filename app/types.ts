@@ -101,3 +101,12 @@ export interface SampleData {
   realEstate: RealEstate[];
   trades: Trade[];
 }
+
+export interface TempMember extends Member {
+  isPrimary?: boolean;
+}
+
+export interface TempAccount extends Account {
+  tempHoldings?: Holding[];
+  tempFixedDeposits?: FixedDeposit[];
+}
