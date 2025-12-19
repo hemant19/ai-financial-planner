@@ -6,4 +6,5 @@
 /.react-router/
 /build/
 
-*.logapp/data/financial-data.json
+*.log
+app/data/financial-data.json
