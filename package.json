@@ -6,7 +6,8 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "cli": "tsx cli/index.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -16,8 +17,13 @@
     "@mui/material": "^7.3.6",
     "@react-router/node": "7.10.1",
     "@react-router/serve": "7.10.1",
-    "firebase": "^12.7.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "csv-parser": "^3.2.0",
+    "fs-extra": "^11.3.3",
     "isbot": "^5.1.31",
+    "kiteconnect": "^5.1.0",
+    "pdf-parse": "^2.4.5",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router": "7.10.1",
@@ -25,10 +31,12 @@
   },
   "devDependencies": {
     "@react-router/dev": "7.10.1",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^22",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/uuid": "^10.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
     "vite-tsconfig-paths": "^5.1.4"

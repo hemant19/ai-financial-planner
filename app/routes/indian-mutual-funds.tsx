@@ -4,18 +4,14 @@ import { useSelection } from '../context/SelectionContext';
 import { DataService } from '../services/data.service';
 import { Holding } from '../types';
 
-export default function USStocks() {
+export default function IndianMutualFunds() {
   const { selectedMemberId } = useSelection();
   const [holdings, setHoldings] = React.useState<Holding[]>([]);
 
   React.useEffect(() => {
     const fetchHoldings = async () => {
-      if (selectedMemberId) { // Ensure selectedMemberId is not null/undefined before fetching
-        const data = await DataService.getHoldingsForMember(selectedMemberId, 'US_EQUITY');
-        setHoldings(data);
-      } else {
-        setHoldings([]); // Clear holdings if no member is selected
-      }
+      const data = await DataService.getHoldingsForMember(selectedMemberId, 'MUTUAL_FUND');
+      setHoldings(data);
     };
     fetchHoldings();
   }, [selectedMemberId]);
@@ -23,18 +19,18 @@ export default function USStocks() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        US Stocks
+        Indian Mutual Funds
       </Typography>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell align="right">Symbol</TableCell>
+              <TableCell align="right">Symbol/ISIN</TableCell>
               <TableCell align="right">Quantity</TableCell>
-              <TableCell align="right">Avg Price (USD)</TableCell>
-              <TableCell align="right">Current Price (USD)</TableCell>
-              <TableCell align="right">Value (USD)</TableCell>
+              <TableCell align="right">Avg Price (INR)</TableCell>
+              <TableCell align="right">Current Price (INR)</TableCell>
+              <TableCell align="right">Value (INR)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -46,13 +42,20 @@ export default function USStocks() {
                 <TableCell component="th" scope="row">
                   {row.name}
                 </TableCell>
-                <TableCell align="right">{row.symbol}</TableCell>
-                <TableCell align="right">{row.quantity}</TableCell>
+                <TableCell align="right">{row.symbol || row.isin}</TableCell>
+                <TableCell align="right">{row.quantity.toLocaleString()}</TableCell>
                 <TableCell align="right">{row.averagePrice.toLocaleString()}</TableCell>
                 <TableCell align="right">{row.lastPrice?.toLocaleString()}</TableCell>
                 <TableCell align="right">{(row.quantity * (row.lastPrice || 0)).toLocaleString()}</TableCell>
               </TableRow>
             ))}
+            {holdings.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  No mutual fund holdings found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

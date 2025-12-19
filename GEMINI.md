@@ -2,178 +2,63 @@
 
 ## Project Overview
 
-A modern, web-based personal finance tracker rewritten from a legacy Java application. It tracks investments, manages trades, and views portfolio performance using a serverless architecture.
+**AI Financial Planner** is a personal finance management application designed to help users track and analyze their financial assets, including Indian equities, mutual funds, US stocks, fixed deposits, and real estate.
 
-**Goal:** Responsive, high-performance UI for tracking Net Worth, Assets, and Trades.
+**Current Status:** The project is in a **prototype phase**. It is currently operating with **mock data** and local state management. While Firebase configuration files exist, the integration is currently disabled in favor of static sample data for rapid UI/UX development.
 
-## Tech Stack
+## Technology Stack
 
-*   **Framework:** React Router v7 (Framework mode)
-*   **Language:** TypeScript
-*   **UI Library:** Material UI (MUI) v7.3.6
-*   **Build Tool:** Vite
-*   **Backend / Platform:** Firebase
-    *   **Hosting:** Firebase Hosting (Web)
-    *   **Database:** Cloud Firestore
-    *   **Auth:** Firebase Auth
-    *   **Storage:** Firebase Storage
-    *   **Functions:** Firebase Cloud Functions (Initialized, currently empty)
+- **Framework:** [React Router v7](https://reactrouter.com/) (formerly Remix features)
+- **Language:** TypeScript
+- **UI Library:** [Material UI v7](https://mui.com/) (Joy/Material)
+- **Build Tool:** Vite
+- **Runtime:** Node.js (for SSR/Serving)
 
 ## Architecture
 
-*   **Type:** Client-Side SPA (Single Page Application).
-*   **State:** Local React state + Context (e.g., `SelectionContext`).
-*   **Persistence:** Direct Firestore access via `firebase/firestore` SDK in `app/services`.
+### Directory Structure
 
-## Data Model
+- **`app/`**: Main application source code.
+    - **`routes.ts`**: Route configuration (config-based routing).
+    - **`routes/`**: Route components (pages).
+    - **`components/`**: Reusable UI components.
+    - **`context/`**: React Context providers (e.g., `AuthContext`, `SelectionContext`).
+    - **`data/`**: Static sample data (`financial-data.ts`) used for the prototype.
+    - **`services/`**: Data access layer (`data.service.ts`). Currently implements `FixedDataService` to serve mock data.
+    - **`theme.ts`**: Material UI theme customization.
+    - **`firebase.ts`**: Firebase initialization (currently commented out).
+- **`public/`**: Static assets.
 
-The primary entity is **Member**. A **Family** is an optional grouping.
+### Key Concepts
 
-### Relationships
-*   **Member** (1) ↔ (N) **Accounts**
-*   **Member** (N) ↔ (0..1) **Family**
-*   **Account** (1) ↔ (N) **Assets** (Fixed Deposits, Holdings)
-*   **Account** (1) ↔ (N) **Trades**
+- **Routing:** Uses React Router v7 config-based routing defined in `app/routes.ts`.
+- **Data Access:** Data fetching is abstracted through a `DataService`. The current implementation (`FixedDataService`) serves static data from `app/data/financial-data.ts`.
+- **Authentication:** Managed via `AuthContext`. Since Firebase Auth is disabled, this likely handles local/mock authentication states.
+- **Styling:** Material UI components with a custom theme provider in `app/root.tsx`.
 
-### Interfaces (from `app/types.ts`)
+## Development
 
-#### 1. Family (`families`)
-Optional top-level grouping.
-```typescript
-export interface Family {
-  id: string;
-  name: string;       // e.g., "Smith Family"
-  baseCurrency: string; // e.g., "INR"
-  createdAt: string;
-  updatedAt: string;
-}
-```
+### Prerequisites
 
-#### 2. Member (`members`)
-**Primary Entity**.
-```typescript
-export interface Member {
-  id: string;
-  familyId?: string;    // Optional link to Family
-  displayName: string;
-  relationship: string; // e.g., "Self", "Spouse"
-  email?: string;
-  avatarUrl?: string;
-  metadata?: Record<string, any>;
-}
-```
-
-#### 3. Account (`accounts`)
-Unified collection for Banks, Demat, and Brokers.
-```typescript
-export type AccountType = 'BANK' | 'DEMAT' | 'US_BROKER';
-export type Currency = 'INR' | 'USD' | 'EUR' | string;
-
-export interface Account {
-  id: string;
-  memberId: string;
-  type: AccountType;
-  institutionName: string; // e.g., "HDFC", "Zerodha"
-  accountName: string;     // e.g., "Salary Account"
-  currency: Currency;
-  currentBalance?: number; // For Bank Accounts
-  linkedPlatformId?: string; // For Broker Accounts
-  isActive: boolean;
-}
-```
-
-#### 4. Fixed Deposit (`fixed_deposits`)
-Linked to `BANK` accounts.
-```typescript
-export interface FixedDeposit {
-  id: string;
-  accountId: string;
-  bankName: string;
-  fdNumber: string;
-  principalAmount: number;
-  interestRate: number;
-  startDate: string;
-  maturityDate: string;
-  maturityAmount?: number;
-  status: 'ACTIVE' | 'MATURED' | 'CLOSED';
-}
-```
-
-#### 5. Holding (`holdings`)
-Assets in `DEMAT` or `US_BROKER` accounts.
-```typescript
-export type AssetClass = 'EQUITY' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'REIT' | 'US_EQUITY';
-
-export interface Holding {
-  id: string;
-  accountId: string;
-  assetClass: AssetClass;
-  symbol: string;       // e.g., "RELIANCE"
-  isin?: string;
-  name: string;
-  quantity: number;
-  averagePrice: number;
-  currency: Currency;
-  lastPrice?: number;   // Market data
-  lastUpdated?: string;
-}
-```
-
-#### 6. Real Estate (`real_estate`)
-```typescript
-export interface RealEstate {
-  id: string;
-  ownerMemberIds: string[];
-  name: string;
-  location: string;
-  purchaseDate: string;
-  purchasePrice: number;
-  currency: Currency;
-  currentValue: number;
-  isSold: boolean;
-}
-```
-
-#### 7. Trade (`trades`)
-Transaction history.
-```typescript
-export type TradeType = 'BUY' | 'SELL';
-
-export interface Trade {
-  id: string;
-  accountId: string;
-  symbol: string;
-  tradeDate: string;
-  type: TradeType;
-  quantity: number;
-  price: number;
-  currency: Currency;
-  fees?: number;
-  netAmount: number;
-}
-```
-
-## Development & Deployment
+- Node.js (v20+ recommended)
+- npm or yarn
 
 ### Scripts
-*   **Dev Server:** `npm run dev` (Runs `react-router dev`)
-*   **Build:** `npm run build`
-*   **Typecheck:** `npm run typecheck`
-*   **Deploy:** `firebase deploy`
 
-### Implementation Notes
-*   **IDs:** Use UUIDs or Firestore auto-IDs.
-*   **Currency:** Handled at presentation layer. Consolidated views use `Family.baseCurrency`.
+| Command | Description |
+| :--- | :--- |
+| `npm run dev` | Starts the development server with hot reload. |
+| `npm run build` | Builds the application for production. |
+| `npm run start` | Runs the built application locally. |
+| `npm run typecheck` | Runs TypeScript type checking. |
 
-## Snippets
+### Configuration
 
-### MUI Grid v2
-Use `size` prop instead of `xs`, `md`.
+- **Firebase:** configured via `firebase.json` and `.firebaserc`, but strictly optional for the current prototype phase.
+- **Environment Variables:** See `.env` (if exists) or `vite.config.ts` for build-time configuration.
 
-```tsx
-<Grid container spacing={2}>
-  <Grid size={{ xs: 12, md: 6 }}>
-    <Item>Content</Item>
-  </Grid>
-</Grid>
-```
+## Contribution Guidelines
+
+1.  **Conventions:** Follow existing TypeScript strict mode patterns.
+2.  **UI:** Use Material UI components for consistency.
+3.  **Data:** When adding new features, extend the `sampleData` in `app/data/financial-data.ts` and update `FixedDataService` to expose it. Do not connect to live backends without updating the architecture to support it.

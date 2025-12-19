@@ -6,6 +6,8 @@ export interface Family {
   updatedAt: string;
 }
 
+export type UserRole = 'OWNER' | 'EDITOR' | 'VIEWER';
+
 export interface Member {
   id: string;
   familyId?: string;
@@ -14,6 +16,28 @@ export interface Member {
   email?: string;
   avatarUrl?: string;
   metadata?: Record<string, any>;
+  uid?: string; // Linked Auth UID (if registered)
+  role: UserRole;
+  inviteStatus?: 'NONE' | 'SENT' | 'ACCEPTED';
+}
+
+export interface UserProfile {
+  uid: string;          // Firebase Auth UID
+  email: string;
+  memberId: string;     // Link to specific Member record
+  familyId: string;     // Quick lookup for context
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  familyId: string;
+  memberId: string;     // The member profile they will claim
+  token: string;
+  expiresAt: string;
+  status: 'PENDING' | 'USED';
 }
 
 export type AccountType = 'BANK' | 'DEMAT' | 'US_BROKER';
@@ -100,6 +124,33 @@ export interface SampleData {
   holdings: Holding[];
   realEstate: RealEstate[];
   trades: Trade[];
+}
+
+export interface AssetAggregates {
+  bankBalance: number;
+  fixedDeposits: number;
+  indianEquities: number;
+  usStocks: number;
+  mutualFunds: number;
+  realEstate: number;
+  total: number;
+}
+
+export interface IDataService {
+  getMembers(): Promise<Member[]>;
+  getMember(id: string): Promise<Member | undefined>;
+  getFamilyMembers(familyId: string): Promise<Member[]>;
+  getAccounts(memberIds: string[]): Promise<Account[]>;
+  getAccount(accountId: string): Promise<Account | null>;
+  getFixedDeposits(accountId: string): Promise<FixedDeposit[]>;
+  getHoldings(accountId: string): Promise<Holding[]>;
+  getHoldingsForMember(memberId: string | null, assetClass?: AssetClass): Promise<Holding[]>;
+  getFixedDepositsForMember(memberId: string | null): Promise<FixedDeposit[]>;
+  getRealEstate(memberId: string | null): Promise<RealEstate[]>;
+  getAssetAggregates(memberId: string | null): Promise<AssetAggregates>;
+  calculateTotalAssets(memberId: string | null): Promise<number>;
+  calculateLiabilities(memberId: string | null): Promise<number>;
+  calculateNetWorth(memberId: string | null): Promise<number>;
 }
 
 export interface TempMember extends Member {

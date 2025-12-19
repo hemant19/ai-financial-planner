@@ -8,6 +8,7 @@ import {
 } from "react-router";
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './theme';
+import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
 
 import type { Route } from "./+types/root";
 
@@ -39,7 +40,9 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Outlet />
+      <AuthProvider> {/* Wrap the app with AuthProvider */}
+        <Outlet />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

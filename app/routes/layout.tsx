@@ -17,8 +17,8 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
   type SelectChangeEvent,
+  Avatar, // Added Avatar import
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -26,9 +26,13 @@ import {
   ShowChart as GraphIcon,
   Public as GlobeIcon,
   AccountBalance as BankIcon,
+  Logout as LogoutIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { SelectionProvider, useSelection } from '../context/SelectionContext';
 import { DataService } from '../services/data.service';
+import { useAuth } from '../context/AuthContext';
+import { Member } from '../types';
 
 const drawerWidth = 240;
 
@@ -42,6 +46,16 @@ function LayoutContent(props: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedMemberId, setSelectedMemberId } = useSelection();
+  const { logout, currentUser } = useAuth(); // Destructure currentUser
+  const [members, setMembers] = React.useState<Member[]>([]);
+
+  React.useEffect(() => {
+    const fetchMembers = async () => {
+      const data = await DataService.getMembers();
+      setMembers(data);
+    };
+    fetchMembers();
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -52,9 +66,19 @@ function LayoutContent(props: Props) {
     setSelectedMemberId(value === '' ? null : value);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Indian Equities', icon: <GraphIcon />, path: '/indian-equities' },
+    { text: 'Indian Mutual Funds', icon: <GraphIcon />, path: '/indian-mutual-funds' },
     { text: 'US Stocks', icon: <GlobeIcon />, path: '/us-stocks' },
     { text: 'Fixed Deposits', icon: <BankIcon />, path: '/fixed-deposits' },
   ];
@@ -110,6 +134,16 @@ function LayoutContent(props: Props) {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             AI Financial Planner
           </Typography>
+          {currentUser && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+              <Avatar sx={{ mr: 1 }}>
+                {currentUser.displayName ? currentUser.displayName.charAt(0) : (currentUser.email ? currentUser.email.charAt(0) : '')}
+              </Avatar>
+              <Typography variant="subtitle1" color="inherit" sx={{ display: { xs: 'none', md: 'block' } }}>
+                {currentUser.displayName || currentUser.email}
+              </Typography>
+            </Box>
+          )}
           <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
             <Select
               value={selectedMemberId || ''}
@@ -121,13 +155,16 @@ function LayoutContent(props: Props) {
               <MenuItem value="">
                 <em>Family</em>
               </MenuItem>
-              {DataService.getMembers().map((member) => (
+              {members.map((member) => (
                 <MenuItem key={member.id} value={member.id}>
                   {member.displayName}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+          <IconButton color="inherit" onClick={handleLogout} aria-label="logout">
+            <LogoutIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Box

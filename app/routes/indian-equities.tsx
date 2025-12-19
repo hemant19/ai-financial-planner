@@ -1,10 +1,20 @@
+import * as React from 'react';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
 import { useSelection } from '../context/SelectionContext';
 import { DataService } from '../services/data.service';
+import { Holding } from '../types';
 
 export default function IndianEquities() {
   const { selectedMemberId } = useSelection();
-  const holdings = DataService.getHoldings(selectedMemberId, 'EQUITY').filter(h => h.currency === 'INR');
+  const [holdings, setHoldings] = React.useState<Holding[]>([]);
+
+  React.useEffect(() => {
+    const fetchHoldings = async () => {
+      const data = await DataService.getHoldingsForMember(selectedMemberId, 'EQUITY');
+      setHoldings(data.filter(h => h.currency === 'INR'));
+    };
+    fetchHoldings();
+  }, [selectedMemberId]);
 
   return (
     <Box>
