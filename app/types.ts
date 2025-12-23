@@ -71,6 +71,27 @@ export interface FixedDeposit {
 
 export type AssetClass = 'EQUITY' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'REIT' | 'US_EQUITY';
 
+export interface HoldingAnalysis {
+  scores: {
+    quality: number;   // 0-10
+    momentum: number;  // 0-10
+    total: number;     // 0-10 (Weighted average or sum)
+  };
+  verdict: 'BUY' | 'HOLD' | 'SELL' | 'ACCUMULATE' | 'TRIM' | 'WATCH';
+  signals: string[];   // ["Strong Uptrend", "Undervalued", "Overbought"]
+  metrics: {
+    roe?: number;
+    debtToEquity?: number;
+    peRatio?: number;
+    revenueGrowth?: number; // YoY
+    rsi?: number;
+    fiftyDMA?: number;
+    twoHundredDMA?: number;
+    fiftyTwoWeekHigh?: number;
+    fiftyTwoWeekLow?: number;
+  };
+}
+
 export interface Holding {
   id: string;
   accountId: string;
@@ -82,7 +103,10 @@ export interface Holding {
   averagePrice: number;
   currency: Currency;
   lastPrice?: number;
+  dayChange?: number;
+  dayChangePercent?: number;
   lastUpdated?: string;
+  analysis?: HoldingAnalysis;
 }
 
 export interface RealEstate {

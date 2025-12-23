@@ -8,3 +8,4 @@
 
 *.log
 app/data/financial-data.json
+cli/data/kite-tokens.json

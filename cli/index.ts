@@ -1,24 +1,36 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { kiteCommand } from './commands/kite';
-import { importCommand } from './commands/import';
+import { importGroup } from './commands/import-group';
+import { marketCommand } from './commands/market';
+import { membersCommand } from './commands/members';
+import { portfolioCommand } from './commands/portfolio';
 
 const program = new Command();
 
 program
   .name('finance-cli')
-  .description('CLI to manage financial data for AI Financial Planner')
-  .version('1.0.0');
+  .description('AI Financial Planner CLI - Version 2.0')
+  .version('2.0.0');
 
-program.addCommand(kiteCommand);
-program.addCommand(importCommand);
+// --- 1. Ingestion Layer ---
+program.addCommand(importGroup);
+
+// --- 2. Market Data Layer ---
+program.addCommand(marketCommand);
+
+// --- 3. View Layer ---
+program.addCommand(portfolioCommand);
+
+// --- 4. Configuration Layer ---
+program.addCommand(membersCommand);
 
 program.command('status')
-  .description('Check the status of the financial data file')
+  .description('Check system health')
   .action(async () => {
-    console.log(chalk.green('CLI is ready and operational!'));
-    // TODO: Add logic to check file stats
+    console.log(chalk.green('✔ CLI is ready.'));
+    console.log(chalk.gray('Use "finance-cli import --help" to ingest data.'));
+    console.log(chalk.gray('Use "finance-cli market update" to refresh prices.'));
   });
 
 program.parse();

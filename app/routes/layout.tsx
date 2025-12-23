@@ -28,6 +28,7 @@ import {
   AccountBalance as BankIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
+  AutoAwesome as AutoAwesomeIcon,
 } from '@mui/icons-material';
 import { SelectionProvider, useSelection } from '../context/SelectionContext';
 import { DataService } from '../services/data.service';
@@ -81,6 +82,7 @@ function LayoutContent(props: Props) {
     { text: 'Indian Mutual Funds', icon: <GraphIcon />, path: '/indian-mutual-funds' },
     { text: 'US Stocks', icon: <GlobeIcon />, path: '/us-stocks' },
     { text: 'Fixed Deposits', icon: <BankIcon />, path: '/fixed-deposits' },
+    { text: 'AI Advisor', icon: <AutoAwesomeIcon />, path: '/advisor' },
   ];
 
   const drawer = (

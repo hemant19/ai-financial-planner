@@ -11,6 +11,8 @@ export default [
     route("indian-mutual-funds", "routes/indian-mutual-funds.tsx"),
     route("us-stocks", "routes/us-stocks.tsx"),
     route("fixed-deposits", "routes/fixed-deposits.tsx"),
+    route("equity/:holdingId", "routes/equity.$holdingId.tsx"),
+    route("advisor", "routes/advisor.tsx"),
   ]),
 
 

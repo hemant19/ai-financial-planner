@@ -2,7 +2,7 @@ import { sampleData } from '../data/financial-data';
 import { Account, FixedDeposit, Holding, RealEstate, Member, Family, UserProfile, Invitation, AssetClass, IDataService, AssetAggregates } from '../types';
 
 export class FixedDataService implements IDataService {
-  private readonly USD_TO_INR = 83;
+  private readonly USD_TO_INR = 90;
 
   // --- Read Methods ---
 
@@ -33,6 +33,10 @@ export class FixedDataService implements IDataService {
 
   async getHoldings(accountId: string): Promise<Holding[]> {
     return sampleData.holdings.filter(h => h.accountId === accountId);
+  }
+
+  async getHolding(id: string): Promise<Holding | undefined> {
+    return sampleData.holdings.find(h => h.id === id);
   }
 
   async getHoldingsForMember(memberId: string | null, assetClass?: AssetClass): Promise<Holding[]> {
@@ -125,6 +129,56 @@ export class FixedDataService implements IDataService {
     const totalAssets = await this.calculateTotalAssets(memberId);
     const liabilities = await this.calculateLiabilities(memberId);
     return totalAssets - liabilities;
+  }
+
+  async calculateDailyChange(memberId: string | null): Promise<number> {
+    const holdings = await this.getHoldingsForMember(memberId);
+    return holdings.reduce((acc, h) => {
+        const change = (h.quantity * (h.dayChange || 0));
+        if (h.currency === 'USD') {
+            return acc + (change * this.USD_TO_INR);
+        }
+        return acc + change;
+    }, 0);
+  }
+
+  async getPortfolioContext(memberId: string | null): Promise<string> {
+    const aggregates = await this.getAssetAggregates(memberId);
+    const netWorth = await this.calculateNetWorth(memberId);
+    const holdings = await this.getHoldingsForMember(memberId);
+    
+    // Sort holdings by value descending
+    const sortedHoldings = holdings.sort((a, b) => {
+        const valA = a.quantity * (a.lastPrice || 0) * (a.currency === 'USD' ? this.USD_TO_INR : 1);
+        const valB = b.quantity * (b.lastPrice || 0) * (b.currency === 'USD' ? this.USD_TO_INR : 1);
+        return valB - valA;
+    });
+
+    const topHoldings = sortedHoldings.slice(0, 10).map(h => {
+        const val = h.quantity * (h.lastPrice || 0);
+        return `- ${h.name} (${h.symbol}): ${h.currency === 'USD' ? '$' : '₹'}${val.toFixed(0)} | Verdict: ${h.analysis?.verdict || 'N/A'} (Q:${h.analysis?.scores.quality || '-'} M:${h.analysis?.scores.momentum || '-'})`;
+    }).join('\n');
+
+    const context = `
+    FINANCIAL PROFILE SUMMARY
+    -------------------------
+    Net Worth: ₹${netWorth.toLocaleString()}
+    Total Assets: ₹${aggregates.total.toLocaleString()}
+    
+    ASSET ALLOCATION:
+    - Bank Balance: ₹${aggregates.bankBalance.toLocaleString()}
+    - Fixed Deposits: ₹${aggregates.fixedDeposits.toLocaleString()}
+    - Indian Equities: ₹${aggregates.indianEquities.toLocaleString()}
+    - US Stocks: ₹${aggregates.usStocks.toLocaleString()}
+    - Mutual Funds: ₹${aggregates.mutualFunds.toLocaleString()}
+    - Real Estate: ₹${aggregates.realEstate.toLocaleString()}
+
+    TOP 10 HOLDINGS (by Value):
+    ${topHoldings}
+
+    Please use this context to answer my financial questions. Focus on asset allocation balance, quality of holdings based on the verdict, and risk exposure.
+    `;
+    return context;
   }
 }
 

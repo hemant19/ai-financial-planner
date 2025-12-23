@@ -2,63 +2,99 @@
 
 ## Project Overview
 
-**AI Financial Planner** is a personal finance management application designed to help users track and analyze their financial assets, including Indian equities, mutual funds, US stocks, fixed deposits, and real estate.
+**AI Financial Planner** is a comprehensive personal finance management system designed to track, analyze, and optimize investment portfolios. It combines a modern web dashboard with a powerful CLI for data ingestion and market intelligence.
 
-**Current Status:** The project is in a **prototype phase**. It is currently operating with **mock data** and local state management. While Firebase configuration files exist, the integration is currently disabled in favor of static sample data for rapid UI/UX development.
+**Key Capabilities:**
+*   **Holistic Tracking:** Aggregates Indian Equities, US Stocks, Mutual Funds, Fixed Deposits, and Real Estate.
+*   **Intelligent Analysis:** Features a custom "Analyst Engine" that scores stocks based on **Quality** (Fundamentals) and **Momentum** (Technicals).
+*   **AI Advisor:** Integrates with **Google Gemini** (via Firebase Vertex AI) to provide personalized, context-aware financial advice through a chat interface.
+*   **Data Independence:** Uses a local JSON file (`app/data/financial-data.json`) as the single source of truth, ensuring privacy and portability.
 
 ## Technology Stack
 
-- **Framework:** [React Router v7](https://reactrouter.com/) (formerly Remix features)
-- **Language:** TypeScript
-- **UI Library:** [Material UI v7](https://mui.com/) (Joy/Material)
-- **Build Tool:** Vite
-- **Runtime:** Node.js (for SSR/Serving)
+*   **Frontend:** [React Router v7](https://reactrouter.com/) (formerly Remix features)
+*   **UI Library:** [Material UI v7](https://mui.com/) (Joy/Material)
+*   **Data Visualization:** `@mui/x-charts`
+*   **Runtime:** Node.js (v20+ recommended)
+*   **Language:** TypeScript
+*   **CLI:** `commander`, `inquirer`, `chalk`
+*   **AI/ML:** Firebase Vertex AI (`firebase/ai`)
+*   **Market Data:** `yahoo-finance2`, `kiteconnect`
 
 ## Architecture
 
 ### Directory Structure
 
-- **`app/`**: Main application source code.
-    - **`routes.ts`**: Route configuration (config-based routing).
-    - **`routes/`**: Route components (pages).
-    - **`components/`**: Reusable UI components.
-    - **`context/`**: React Context providers (e.g., `AuthContext`, `SelectionContext`).
-    - **`data/`**: Static sample data (`financial-data.ts`) used for the prototype.
-    - **`services/`**: Data access layer (`data.service.ts`). Currently implements `FixedDataService` to serve mock data.
-    - **`theme.ts`**: Material UI theme customization.
-    - **`firebase.ts`**: Firebase initialization (currently commented out).
-- **`public/`**: Static assets.
+*   **`app/`**: Frontend application source code.
+    *   **`routes.ts`**: Route configuration (React Router v7 config-based routing).
+    *   **`routes/`**: Page components (Dashboard, Equity Detail, Advisor, etc.).
+    *   **`services/data.service.ts`**: The central data access layer. Handles reading/writing to the local JSON store and aggregating metrics.
+    *   **`firebase.ts`**: Firebase initialization and AI service export.
+    *   **`types.ts`**: Core TypeScript definitions (Holding, Member, Analysis, etc.).
+    *   **`data/`**: Storage for the local database (`financial-data.json`).
+*   **`cli/`**: Command Line Interface tools.
+    *   **`index.ts`**: Entry point for the CLI.
+    *   **`commands/`**: Command modules grouped by domain (`import`, `market`, `portfolio`, `members`).
+    *   **`utils/analyst.ts`**: The **Analyst Engine**. Contains logic for calculating RSI, Moving Averages, and generating Buy/Sell verdicts.
+    *   **`utils/interactive.ts`**: Helpers for interactive CLI prompts.
 
 ### Key Concepts
 
-- **Routing:** Uses React Router v7 config-based routing defined in `app/routes.ts`.
-- **Data Access:** Data fetching is abstracted through a `DataService`. The current implementation (`FixedDataService`) serves static data from `app/data/financial-data.ts`.
-- **Authentication:** Managed via `AuthContext`. Since Firebase Auth is disabled, this likely handles local/mock authentication states.
-- **Styling:** Material UI components with a custom theme provider in `app/root.tsx`.
+*   **The Analyst Engine:** When you run `market update`, the system doesn't just fetch prices. It fetches historical data (300 days) and financial statements to calculate:
+    *   **Quality Score:** Based on ROE, Debt/Equity, P/E Ratio, and Revenue Growth.
+    *   **Momentum Score:** Based on RSI, 50/200 DMA trends, and 52-week high proximity.
+    *   **Verdict:** A derived action signal (BUY, ACCUMULATE, HOLD, TRIM, SELL).
+*   **Dual-Score Strategy:** The system supports a "Core & Satellite" investing philosophy by exposing both Quality (for stability) and Momentum (for alpha) metrics.
+*   **Smart Ingestion:** The CLI supports interactive imports from multiple brokers (Zerodha Kite, IIFL, IBKR) and handles currency conversion automatically.
 
-## Development
+## Development & Usage
 
 ### Prerequisites
+*   Node.js (v20+)
+*   npm
+*   A Firebase project with Vertex AI enabled (for the Advisor feature).
 
-- Node.js (v20+ recommended)
-- npm or yarn
+### Setup
+1.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+2.  **Configure Environment:**
+    Create a `.env` file with your Firebase credentials (see `app/firebase.ts` for required keys).
 
-### Scripts
+### Running the Application
 
 | Command | Description |
 | :--- | :--- |
-| `npm run dev` | Starts the development server with hot reload. |
-| `npm run build` | Builds the application for production. |
-| `npm run start` | Runs the built application locally. |
-| `npm run typecheck` | Runs TypeScript type checking. |
+| `npm run dev` | Starts the web dashboard (frontend) in development mode. |
+| `npm run cli` | Access the CLI tool (e.g., `npm run cli -- help`). |
+| `npm run build` | Builds the web dashboard (frontend) for production. |
+| `npm run start` | Starts the web dashboard (frontend) in production mode. |
+| `npm run build -- --mode dev` | Builds the web dashboard (frontend) in development mode. |
 
-### Configuration
+### CLI Command Reference
 
-- **Firebase:** configured via `firebase.json` and `.firebaserc`, but strictly optional for the current prototype phase.
-- **Environment Variables:** See `.env` (if exists) or `vite.config.ts` for build-time configuration.
+The CLI is the power user's tool for managing the portfolio.
+
+*   **Ingest Data:**
+    *   `npm run cli -- import kite sync`: Sync holdings from Zerodha (Interactive login).
+    *   `npm run cli -- import iifl <file.csv>`: Import IIFL Holdings CSV.
+    *   `npm run cli -- import ibkr <file.tsv>`: Import Interactive Brokers TSV.
+    *   `npm run cli -- import us-stocks <file.csv>`: Generic US Stock import.
+    *   *Note: If you omit flags like `--member-id`, the CLI will prompt you interactively.*
+
+*   **Market Intelligence:**
+    *   `npm run cli -- market update`: Fetches latest prices, calculates daily change, and runs the **Analyst Engine** to update ratings.
+
+*   **Portfolio Review:**
+    *   `npm run cli -- portfolio summary`: Displays a quick terminal summary of Net Worth and Asset Allocation.
+
+*   **Configuration:**
+    *   `npm run cli -- members`: Manage family members.
 
 ## Contribution Guidelines
 
-1.  **Conventions:** Follow existing TypeScript strict mode patterns.
-2.  **UI:** Use Material UI components for consistency.
-3.  **Data:** When adding new features, extend the `sampleData` in `app/data/financial-data.ts` and update `FixedDataService` to expose it. Do not connect to live backends without updating the architecture to support it.
+1.  **Conventions:** Follow strict TypeScript typing. All new data entities must be defined in `app/types.ts`.
+2.  **Data Logic:** Business logic regarding asset calculations should reside in `DataService` or `cli/utils/analyst.ts`, not in the UI components.
+3.  **UI:** Use Material UI components for consistency. Use the `Dashboard` layout for all new pages.
+4.  **CLI:** Follow the "Intent-Centric" command structure (`import`, `market`, `view`) rather than "Vendor-Centric".
