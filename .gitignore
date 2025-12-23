@@ -7,5 +7,6 @@
 /build/
 
 *.log
-# core/src/data/financial-data.json
+core/src/data/financial-data.json
+core/src/data/market-data.json
 cli/data/kite-tokens.json
