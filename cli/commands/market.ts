@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 // @ts-ignore
 import YahooFinance from 'yahoo-finance2';
-import { readData, writeData } from '../utils/file-manager';
+import { StorageService } from '@core/services/storage.service';
 import { analyzeStock, FinancialData } from '../utils/analyst';
 import { classifyHolding } from '../utils/classifier';
 
@@ -13,7 +13,7 @@ async function updatePricesAction() {
   console.log(chalk.blue('Starting price update via Yahoo Finance...'));
 
   try {
-    const appData = await readData();
+    const appData = await StorageService.loadData();
     let updatedCount = 0;
 
     // Group holdings by Yahoo ticker to batch requests if needed,
@@ -225,11 +225,10 @@ async function updatePricesAction() {
               }
           });
     
-          // Save
-          if (updatedCount > 0 || true) { // Always save to persist classifications      await writeData(appData);
-      console.log(chalk.green(`Successfully updated prices for ${updatedCount} holdings.`));
-    } else {
-      console.log(chalk.yellow('No prices updated.'));
+                // Save
+                if (updatedCount > 0 || true) { // Always save to persist classifications      await StorageService.saveData(appData);
+                console.log(chalk.green(`Successfully updated prices for ${updatedCount} holdings.`));
+              } else {      console.log(chalk.yellow('No prices updated.'));
     }
 
   } catch (error) {

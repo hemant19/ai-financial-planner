@@ -5,7 +5,7 @@ import path from 'path';
 import http from 'http';
 import inquirer from 'inquirer';
 import { KiteConnect } from 'kiteconnect';
-import { readData, writeData } from '../utils/file-manager';
+import { StorageService } from '@core/services/storage.service';
 import type { Holding } from '@core/types';
 
 const TOKENS_PATH = path.resolve('cli/data/kite-tokens.json');
@@ -142,7 +142,7 @@ kiteCommand
         return;
       }
 
-      const appData = await readData();
+      const appData = await StorageService.loadData();
       let hasUpdates = false;
 
       for (const user of targetUsers) {
@@ -240,7 +240,7 @@ kiteCommand
       }
 
       if (hasUpdates) {
-        await writeData(appData);
+        await StorageService.saveData(appData);
         console.log(chalk.green('All syncs completed and data saved.'));
       } else {
         console.log(chalk.yellow('No data updated.'));

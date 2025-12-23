@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import csv from 'csv-parser';
-import { readData, writeData } from '../utils/file-manager';
+import { StorageService } from '@core/services/storage.service';
 import { resolveMemberId } from '../utils/interactive';
 import type { Holding } from '@core/types';
 
@@ -23,12 +23,12 @@ usStocksCommand
       return;
     }
 
-    const appData = await readData();
-    // Try finding by ID first
+    const appData = await StorageService.loadData();
+    
+    // Find Member
     let member = appData.members.find(m => m.id === targetMemberId);
-
-    // Fallback: Try finding by name
     if (!member) {
+       // Fallback by name
        member = appData.members.find(m => 
         m.displayName.toLowerCase().includes(targetMemberId.toLowerCase())
       );
@@ -39,117 +39,64 @@ usStocksCommand
       return;
     }
 
-    // Find or create US Broker account
-    let account = appData.accounts.find(a => a.memberId === member.id && a.type === 'US_BROKER');
+    // Find or Create Account
+    let account = appData.accounts.find(a => a.memberId === member!.id && a.institutionName === 'US_BROKER');
     if (!account) {
-      console.log(chalk.blue(`Creating US Broker account for ${member.displayName}...`));
-      account = {
-        id: `acc_us_${member.id}`,
-        memberId: member.id,
-        type: 'US_BROKER',
-        institutionName: 'US Broker', // Generic name or infer?
-        accountName: 'US Stocks',
-        currency: 'USD',
-        isActive: true
-      };
-      appData.accounts.push(account);
+        console.log(chalk.blue(`Creating US Broker account for ${member.displayName}...`));
+        account = {
+            id: `acc_us_${member.id}`,
+            memberId: member.id,
+            type: 'US_BROKER',
+            institutionName: 'US_BROKER',
+            accountName: 'US Investment Account',
+            currency: 'USD',
+            isActive: true
+        };
+        appData.accounts.push(account);
     }
 
-    const trades: Trade[] = [];
-    const portfolio: Record<string, { quantity: number, totalCost: number, avgPrice: number }> = {};
-
-    console.log(chalk.blue('Processing trades...'));
+    const holdings: Holding[] = [];
 
     fs.createReadStream(file)
-      .pipe(csv({ separator: '\t' })) // Assuming TSV based on copy-paste, checking headers might be safer
-      .on('headers', (headers) => {
-          // simple check if it looks like CSV or TSV
-          if (headers.length === 1 && headers[0].includes(',')) {
-              // It's likely comma separated, but we initialized with tab. 
-              // This is a limitation of simple pipe.
-              // For now, I'll stick to TSV as the user data pasted looks like it.
-              // If needed we can make it an option.
-          }
-      })
+      .pipe(csv())
       .on('data', (row: any) => {
-        // Map loose headers if needed, or rely on strict matching
-        const dateStr = row['Transaction Date'];
-        const type = row['Transaction Type']?.toUpperCase();
-        const symbol = row['Stock'];
-        const qty = parseFloat(row['Quantity']);
-        const price = parseCurrency(row['Buy Price'] || row['Price'] || row['Amount']); // Fallback
+        // Parsing logic for Generic US CSV/TSV
+        // Assuming columns: Symbol, Quantity, Cost Basis, ...
+        // Adapting based on common formats or user provided
+        const symbol = row['Symbol'] || row['Ticker'];
+        if (!symbol) return;
 
-        if (!symbol || !type || isNaN(qty)) return;
+        const quantity = parseFloat(row['Quantity'] || row['Shares'] || '0');
+        const avgPrice = parseFloat(row['Cost Basis'] || row['Avg Price'] || '0');
+        // If current price is in file, use it, else default 0
+        const lastPrice = parseFloat(row['Current Price'] || '0');
 
-        // Track Trade
-        trades.push({
-            id: `tr_us_${symbol}_${dateStr}_${Math.random().toString(36).substr(2, 5)}`,
-            accountId: account!.id,
-            symbol,
-            tradeDate: parseDate(dateStr),
-            type: type as 'BUY' | 'SELL',
-            quantity: qty,
-            price: price,
-            currency: 'USD',
-            netAmount: price * qty,
-            exchange: 'US'
-        });
-
-        // Update Portfolio (Holdings Calculation)
-        if (!portfolio[symbol]) {
-            portfolio[symbol] = { quantity: 0, totalCost: 0, avgPrice: 0 };
-        }
-
-        const position = portfolio[symbol];
-
-        if (type === 'BUY') {
-            position.totalCost += (qty * price);
-            position.quantity += qty;
-            position.avgPrice = position.totalCost / position.quantity;
-        } else if (type === 'SELL') {
-            position.quantity -= qty;
-            if (position.quantity <= 0) {
-                 position.quantity = 0;
-                 position.totalCost = 0;
-                 position.avgPrice = 0;
-            } else {
-                 // On sell, total cost reduces proportionally
-                 position.totalCost = position.quantity * position.avgPrice;
-            }
+        if (quantity > 0) {
+            holdings.push({
+              id: `h_us_${symbol}_${member!.id}`,
+              accountId: account!.id,
+              assetClass: 'EQUITY', // Will be refined
+              assetType: 'DIRECT',
+              symbol: symbol,
+              name: symbol, // Name often not in simple CSV
+              quantity: quantity,
+              averagePrice: avgPrice,
+              lastPrice: lastPrice,
+              currency: 'USD',
+              lastUpdated: new Date().toISOString()
+            });
         }
       })
       .on('end', async () => {
-        // Convert portfolio to Holdings
-        const newHoldings: Holding[] = Object.entries(portfolio)
-            .filter(([_, data]) => data.quantity > 0.001) // Filter out closed positions
-            .map(([symbol, data]) => ({
-                id: `h_us_${symbol}_${member.id}`,
-                accountId: account!.id,
-                assetClass: 'US_EQUITY',
-                symbol: symbol,
-                name: symbol, // Could fetch name if needed
-                quantity: data.quantity,
-                averagePrice: data.avgPrice,
-                currency: 'USD',
-                lastUpdated: new Date().toISOString()
-                // lastPrice is missing, would need a fetch or manual update. 
-                // For now, leave undefined or use avgPrice as placeholder? 
-                // Better undefined so UI can handle it or we fetch it later.
-            }));
-
-        // Update App Data
-        // 1. Clear old US holdings for this account
-        appData.holdings = appData.holdings.filter(h => h.accountId !== account!.id);
-        appData.holdings.push(...newHoldings);
-
-        // 2. Add trades (optional, but good for history)
-        // Check if we should replace trades or append. 
-        // For simplicity, let's filter out old US trades for this account and replace.
-        appData.trades = appData.trades.filter(t => t.accountId !== account!.id);
-        appData.trades.push(...trades);
-
-        await writeData(appData);
-        console.log(chalk.green(`Imported ${trades.length} trades.`));
-        console.log(chalk.green(`Updated ${newHoldings.length} US holdings for ${member.displayName}.`));
+        try {
+          // Remove existing holdings for this specific account
+          appData.holdings = appData.holdings.filter(h => h.accountId !== account!.id);
+          appData.holdings.push(...holdings);
+          
+          await StorageService.saveData(appData);
+          console.log(chalk.green(`Successfully imported ${holdings.length} holdings for ${member!.displayName} (Account: US Stocks).`));
+        } catch (error) {
+          console.error(chalk.red('Error saving data:'), error);
+        }
       });
   });

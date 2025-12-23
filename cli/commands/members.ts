@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { readData } from '../utils/file-manager';
+import { StorageService } from '@core/services/storage.service';
 
 export const membersCommand = new Command('members');
 
@@ -8,7 +8,7 @@ membersCommand
   .description('Manage family members')
   .action(async () => {
     try {
-      const data = await readData();
+      const data = await StorageService.loadData();
       console.log(chalk.blue(`Members of family: ${data.family.name}`));
       console.log(chalk.yellow('ID'.padEnd(10) + ' | ' + 'Display Name'.padEnd(25) + ' | ' + 'Relationship'));
       console.log('-'.repeat(60));

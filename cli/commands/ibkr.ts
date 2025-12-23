@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import csv from 'csv-parser';
-import { readData, writeData } from '../utils/file-manager';
+import { StorageService } from '@core/services/storage.service';
 import { resolveMemberId } from '../utils/interactive';
 import type { Holding } from '@core/types';
 
@@ -21,7 +21,7 @@ function parseCurrency(val: string): number {
 }
 
 ibkrCommand
-  .command('csv <file>')
+  .command('import <file>')
   .option('-m, --member-id <id>', 'Member ID to map this account to')
   .description('Import holdings from IBKR TSV')
   .action(async (file, options) => {
@@ -35,13 +35,13 @@ ibkrCommand
       return;
     }
 
-    const appData = await readData();
-
+    const appData = await StorageService.loadData();
+    
     // Find Member
     let member = appData.members.find(m => m.id === targetMemberId);
     if (!member) {
-      // Fallback by name
-      member = appData.members.find(m =>
+       // Fallback by name
+       member = appData.members.find(m => 
         m.displayName.toLowerCase().includes(targetMemberId.toLowerCase())
       );
     }
@@ -54,17 +54,17 @@ ibkrCommand
     // Find or Create Account
     let account = appData.accounts.find(a => a.memberId === member!.id && a.institutionName === 'IBKR');
     if (!account) {
-      console.log(chalk.blue(`Creating IBKR account for ${member.displayName}...`));
-      account = {
-        id: `acc_ibkr_${member.id}`,
-        memberId: member.id,
-        type: 'US_BROKER',
-        institutionName: 'IBKR',
-        accountName: 'Interactive Brokers',
-        currency: 'USD',
-        isActive: true
-      };
-      appData.accounts.push(account);
+        console.log(chalk.blue(`Creating IBKR account for ${member.displayName}...`));
+        account = {
+            id: `acc_ibkr_${member.id}`,
+            memberId: member.id,
+            type: 'US_BROKER',
+            institutionName: 'IBKR',
+            accountName: 'Interactive Brokers',
+            currency: 'USD',
+            isActive: true
+        };
+        appData.accounts.push(account);
     }
 
     const holdings: Holding[] = [];
@@ -82,7 +82,7 @@ ibkrCommand
         holdings.push({
           id: `h_ibkr_${symbol}_${member!.id}`,
           accountId: account!.id,
-          assetClass: 'US_EQUITY',
+          assetClass: 'EQUITY', // Default, will be refined by market update
           symbol: symbol,
           name: symbol,
           quantity: quantity,
@@ -97,8 +97,8 @@ ibkrCommand
           // Remove existing holdings for this specific account
           appData.holdings = appData.holdings.filter(h => h.accountId !== account!.id);
           appData.holdings.push(...holdings);
-
-          await writeData(appData);
+          
+          await StorageService.saveData(appData);
           console.log(chalk.green(`Successfully imported ${holdings.length} holdings for ${member!.displayName} (Account: IBKR).`));
         } catch (error) {
           console.error(chalk.red('Error saving data:'), error);

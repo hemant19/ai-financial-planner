@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
-import { readData } from './file-manager';
+import { StorageService } from '@core/services/storage.service';
 
 export async function resolveMemberId(providedId?: string): Promise<string | null> {
-  const data = await readData();
+  const data = await StorageService.loadData();
   
   // 1. If provided and valid, return it.
   if (providedId) {
