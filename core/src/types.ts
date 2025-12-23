@@ -69,7 +69,7 @@ export interface FixedDeposit {
   status: 'ACTIVE' | 'MATURED' | 'CLOSED';
 }
 
-export type AssetClass = 'EQUITY' | 'DEBT' | 'COMMODITY' | 'REAL_ESTATE' | 'OTHER';
+export type AssetClass = 'EQUITY' | 'DEBT' | 'COMMODITY' | 'REAL_ESTATE' | 'OTHER' | 'MUTUAL_FUND' | 'US_EQUITY';
 
 export type AssetCategory = 
   | 'LARGECAP' | 'MIDCAP' | 'SMALLCAP' | 'MULTICAP' 
@@ -77,6 +77,17 @@ export type AssetCategory =
   | 'GOLD' | 'SILVER' 
   | 'RESIDENTIAL' | 'COMMERCIAL' 
   | 'INDEX_FUND' | 'ETF' | 'SECTOR_FUND' | 'OTHER';
+
+export interface HoldingAnalysis {
+  verdict: string;
+  scores: {
+    quality: number;
+    momentum: number;
+    total?: number;
+  };
+  signals: string[];
+  metrics: Record<string, any>;
+}
 
 export interface Holding {
   id: string;
@@ -149,7 +160,7 @@ export interface AssetAggregates {
   total: number;
 }
 
-export interface IDataService {
+export interface DataService {
   getMembers(): Promise<Member[]>;
   getMember(id: string): Promise<Member | undefined>;
   getFamilyMembers(familyId: string): Promise<Member[]>;

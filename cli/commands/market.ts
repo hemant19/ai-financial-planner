@@ -157,7 +157,7 @@ async function updatePricesAction() {
                                       currentPrice: price,
                                       roe: summary.financialData?.returnOnEquity,
                                       debtToEquity: summary.financialData?.debtToEquity,
-                                      peRatio: summary.defaultKeyStatistics?.trailingPE || summary.defaultKeyStatistics?.forwardPE,
+                                      peRatio: (summary.defaultKeyStatistics?.trailingPE || summary.defaultKeyStatistics?.forwardPE) as number,
                                       revenueGrowth: summary.financialData?.revenueGrowth,
                                       fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh
                                   };
@@ -197,7 +197,7 @@ async function updatePricesAction() {
                               }
                           });
                           
-                          const analysisLog = analysisResult ? ` | Score: ${analysisResult.scores.total.toFixed(1)} (${analysisResult.verdict})` : '';
+                          const analysisLog = (analysisResult && analysisResult.scores.total !== undefined) ? ` | Score: ${analysisResult.scores.total.toFixed(1)} (${analysisResult.verdict})` : '';
                           console.log(chalk.gray(`Updated ${yahooSymbol}: ${price} (${dayChangePercent?.toFixed(2)}%)${analysisLog}`));
                       }
                   } catch (err: any) {

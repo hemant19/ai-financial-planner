@@ -1,42 +1,44 @@
 import { sampleData } from '../data/financial-data';
-import { Account, FixedDeposit, Holding, RealEstate, Member, Family, UserProfile, Invitation, AssetClass, IDataService, AssetAggregates } from '../types';
+import { Account, FixedDeposit, Holding, RealEstate, Member, Family, UserProfile, Invitation, AssetClass, DataService as DataServiceInterface, AssetAggregates, SampleData } from '../types';
 
-export class FixedDataService implements IDataService {
+export class FixedDataService implements DataServiceInterface {
   private readonly USD_TO_INR = 90;
+
+  constructor(private data: SampleData) {}
 
   // --- Read Methods ---
 
   async getMembers(): Promise<Member[]> {
-    return sampleData.members;
+    return this.data.members;
   }
 
   async getMember(id: string): Promise<Member | undefined> {
-    return sampleData.members.find((m) => m.id === id);
+    return this.data.members.find((m) => m.id === id);
   }
 
   async getFamilyMembers(familyId: string): Promise<Member[]> {
-    return sampleData.members.filter(m => m.familyId === familyId);
+    return this.data.members.filter(m => m.familyId === familyId);
   }
 
   async getAccounts(memberIds: string[]): Promise<Account[]> {
     if (memberIds.length === 0) return [];
-    return sampleData.accounts.filter(a => memberIds.includes(a.memberId));
+    return this.data.accounts.filter(a => memberIds.includes(a.memberId));
   }
 
   async getAccount(accountId: string): Promise<Account | null> {
-    return sampleData.accounts.find(a => a.id === accountId) || null;
+    return this.data.accounts.find(a => a.id === accountId) || null;
   }
 
   async getFixedDeposits(accountId: string): Promise<FixedDeposit[]> {
-    return sampleData.fixedDeposits.filter(fd => fd.accountId === accountId);
+    return this.data.fixedDeposits.filter(fd => fd.accountId === accountId);
   }
 
   async getHoldings(accountId: string): Promise<Holding[]> {
-    return sampleData.holdings.filter(h => h.accountId === accountId);
+    return this.data.holdings.filter(h => h.accountId === accountId);
   }
 
   async getHolding(id: string): Promise<Holding | undefined> {
-    return sampleData.holdings.find(h => h.id === id);
+    return this.data.holdings.find(h => h.id === id);
   }
 
   async getHoldingsForMember(
@@ -46,12 +48,12 @@ export class FixedDataService implements IDataService {
   ): Promise<Holding[]> {
     let accounts: Account[] = [];
     if (!memberId) {
-      accounts = sampleData.accounts;
+      accounts = this.data.accounts;
     } else {
-      accounts = sampleData.accounts.filter(a => a.memberId === memberId);
+      accounts = this.data.accounts.filter(a => a.memberId === memberId);
     }
     const accountIds = accounts.map(a => a.id);
-    let holdings = sampleData.holdings.filter(h => accountIds.includes(h.accountId));
+    let holdings = this.data.holdings.filter(h => accountIds.includes(h.accountId));
     
     if (assetClass !== undefined) {
       holdings = holdings.filter(h => h.assetClass === assetClass);
@@ -65,17 +67,17 @@ export class FixedDataService implements IDataService {
   async getFixedDepositsForMember(memberId: string | null): Promise<FixedDeposit[]> {
     let accounts: Account[] = [];
     if (!memberId) {
-      accounts = sampleData.accounts;
+      accounts = this.data.accounts;
     } else {
-      accounts = sampleData.accounts.filter(a => a.memberId === memberId);
+      accounts = this.data.accounts.filter(a => a.memberId === memberId);
     }
     const accountIds = accounts.map(a => a.id);
-    return sampleData.fixedDeposits.filter(fd => accountIds.includes(fd.accountId));
+    return this.data.fixedDeposits.filter(fd => accountIds.includes(fd.accountId));
   }
 
   async getRealEstate(memberId: string | null): Promise<RealEstate[]> {
-    if (!memberId) return sampleData.realEstate;
-    return sampleData.realEstate.filter((re) => re.ownerMemberIds.includes(memberId));
+    if (!memberId) return this.data.realEstate;
+    return this.data.realEstate.filter((re) => re.ownerMemberIds.includes(memberId));
   }
 
   // --- Calculation Methods ---
@@ -83,14 +85,14 @@ export class FixedDataService implements IDataService {
   async getAssetAggregates(memberId: string | null): Promise<AssetAggregates> {
     let accounts: Account[] = [];
     if (!memberId) {
-      accounts = sampleData.accounts;
+      accounts = this.data.accounts;
     } else {
-      accounts = sampleData.accounts.filter(a => a.memberId === memberId);
+      accounts = this.data.accounts.filter(a => a.memberId === memberId);
     }
     const accountIds = accounts.map(a => a.id);
 
-    const holdings = sampleData.holdings.filter(h => accountIds.includes(h.accountId));
-    const fixedDeposits = sampleData.fixedDeposits.filter(fd => accountIds.includes(fd.accountId));
+    const holdings = this.data.holdings.filter(h => accountIds.includes(h.accountId));
+    const fixedDeposits = this.data.fixedDeposits.filter(fd => accountIds.includes(fd.accountId));
     const realEstate = await this.getRealEstate(memberId);
 
     const bankBalance = accounts
@@ -210,4 +212,4 @@ export class FixedDataService implements IDataService {
   }
 }
 
-export const DataService = new FixedDataService();
+export const DataService = new FixedDataService(sampleData);

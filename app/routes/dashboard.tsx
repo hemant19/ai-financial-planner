@@ -63,67 +63,65 @@ export default function Dashboard() {
     <Box sx={{ pb: 4 }}>
       <Typography variant="h4" gutterBottom>Dashboard</Typography>
       
-      {/* KPI Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>Net Worth</Typography>
-            <Typography component="p" variant="h4">₹{netWorth.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
-            <Typography color="text.secondary" sx={{ flex: 1 }}>on {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>Total Assets</Typography>
-            <Typography component="p" variant="h4">₹{totalAssets.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>Day's Change</Typography>
-            <Typography component="p" variant="h4" color={getColor(dailyChange)}>
-              {getSign(dailyChange)}₹{Math.abs(dailyChange).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-            </Typography>
-            <Typography variant="subtitle1" color={getColor(dailyChange)}>({dailyChangePercent.toFixed(2)}%)</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>Liabilities</Typography>
-            <Typography component="p" variant="h4">₹{totalLiabilities.toLocaleString()}</Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={3}>
-        {/* Macro Allocation (Donut) */}
-        <Grid item xs={12} md={5}>
-            <Paper sx={{ p: 2, height: 450, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography variant="h6" gutterBottom>Asset Allocation</Typography>
-                <PieChart
-                    colors={palette}
-                    series={[{
-                        data: macroData,
-                        innerRadius: 80,
-                        paddingAngle: 2,
-                        cornerRadius: 5,
-                        arcLabel: (item) => `${((item.value / aggregates.total) * 100).toFixed(0)}%`,
-                        arcLabelMinAngle: 20,
-                        highlightScope: { faded: 'global', highlighted: 'item' },
-                        faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
-                        valueFormatter: (item: { value: number }) => `₹${item.value.toLocaleString()}`,
-                    }]}
-                    height={350}
-                    slotProps={{
-                        legend: { direction: 'column', position: { vertical: 'middle', horizontal: 'right' }, padding: 0, labelStyle: { fontSize: 12 } }
-                    }}
-                />
-            </Paper>
-        </Grid>
-
-        {/* Micro Allocation (Bar Chart) */}
-        <Grid item xs={12} md={7}>
-            <Paper sx={{ p: 2, height: 450, display: 'flex', flexDirection: 'column' }}>
+              {/* KPI Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+                  <Typography component="h2" variant="h6" color="primary" gutterBottom>Net Worth</Typography>
+                  <Typography component="p" variant="h4">₹{netWorth.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
+                  <Typography color="text.secondary" sx={{ flex: 1 }}>on {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Typography>
+                </Paper>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+                  <Typography component="h2" variant="h6" color="primary" gutterBottom>Total Assets</Typography>
+                  <Typography component="p" variant="h4">₹{totalAssets.toLocaleString(undefined, { maximumFractionDigits: 0 })}</Typography>
+                </Paper>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+                  <Typography component="h2" variant="h6" color="primary" gutterBottom>Day's Change</Typography>
+                  <Typography component="p" variant="h4" color={getColor(dailyChange)}>
+                    {getSign(dailyChange)}₹{Math.abs(dailyChange).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  </Typography>
+                  <Typography variant="subtitle1" color={getColor(dailyChange)}>({dailyChangePercent.toFixed(2)}%)</Typography>
+                </Paper>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+                  <Typography component="h2" variant="h6" color="primary" gutterBottom>Liabilities</Typography>
+                  <Typography component="p" variant="h4">₹{totalLiabilities.toLocaleString()}</Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+      
+            <Grid container spacing={3}>
+              {/* Macro Allocation (Donut) */}
+              <Grid size={{ xs: 12, md: 5 }}>
+                  <Paper sx={{ p: 2, height: 450, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <Typography variant="h6" gutterBottom>Asset Allocation</Typography>
+                      <PieChart
+                          colors={palette}
+                          series={[{
+                              data: macroData,
+                              innerRadius: 80,
+                              paddingAngle: 2,
+                              cornerRadius: 5,
+                              arcLabel: (item) => `${((item.value / aggregates.total) * 100).toFixed(0)}%`,
+                              arcLabelMinAngle: 20,
+                                                      highlightScope: { fade: 'global', highlight: 'item' },
+                                                      faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                                                      valueFormatter: (item: { value: number }) => `₹${item.value.toLocaleString()}`,
+                                                  }]}
+                                                  height={350}
+                                                                                                              slotProps={{
+                                                                                                                  legend: { position: { vertical: 'middle', horizontal: 'end' } }
+                                                                                                              }}                      />
+                  </Paper>
+              </Grid>
+      
+              {/* Micro Allocation (Bar Chart) */}
+              <Grid size={{ xs: 12, md: 7 }}>            <Paper sx={{ p: 2, height: 450, display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="h6" gutterBottom>Detailed Breakdown</Typography>
                 {categoryData.length > 0 ? (
                     <BarChart

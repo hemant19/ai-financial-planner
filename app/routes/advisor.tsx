@@ -24,7 +24,7 @@ export default function Advisor() {
   const [input, setInput] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [chatSession, setChatSession] = React.useState<ChatSession | null>(null);
-  const messagesEndRef = React.useRef<div | null>(null);
+  const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

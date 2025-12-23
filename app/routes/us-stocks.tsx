@@ -50,19 +50,19 @@ export default function USStocks() {
       </Typography>
 
       <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
             <Paper sx={{ p: 2 }}>
                 <Typography color="text.secondary" variant="overline">Total Invested (USD)</Typography>
                 <Typography variant="h6">${totalInvested.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
             </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
             <Paper sx={{ p: 2 }}>
                 <Typography color="text.secondary" variant="overline">Current Value (USD)</Typography>
                 <Typography variant="h6">${totalCurrentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</Typography>
             </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
             <Paper sx={{ p: 2 }}>
                 <Typography color="text.secondary" variant="overline">Day's Change (USD)</Typography>
                 <Typography variant="h6" color={getColor(totalDayChange)}>
@@ -70,7 +70,7 @@ export default function USStocks() {
                 </Typography>
             </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
             <Paper sx={{ p: 2 }}>
                 <Typography color="text.secondary" variant="overline">Total Return (USD)</Typography>
                 <Typography variant="h6" color={getColor(totalChange)}>

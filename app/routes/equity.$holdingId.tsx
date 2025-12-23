@@ -63,7 +63,7 @@ export default function EquityDetail() {
       {/* Header Section */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Grid container alignItems="center" spacing={2}>
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Typography variant="h4" fontWeight="bold">
               {holding.name}
             </Typography>
@@ -71,7 +71,7 @@ export default function EquityDetail() {
               {holding.symbol} • {holding.assetClass === 'US_EQUITY' ? 'US Market' : 'NSE/BSE'}
             </Typography>
           </Grid>
-          <Grid item xs={12} md={4} sx={{ textAlign: { md: 'right' } }}>
+          <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { md: 'right' } }}>
             <Typography variant="h3">
               {holding.currency === 'USD' ? '$' : '₹'}{holding.lastPrice?.toLocaleString()}
             </Typography>
@@ -90,7 +90,7 @@ export default function EquityDetail() {
         <>
           {/* Verdict & Scores */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ p: 3, height: '100%', textAlign: 'center', bgcolor: 'action.hover' }}>
                 <Typography variant="overline">Analyst Verdict</Typography>
                 <Box sx={{ mt: 2, mb: 2 }}>
@@ -106,7 +106,7 @@ export default function EquityDetail() {
               </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ p: 3, height: '100%' }}>
                 <Typography variant="h6" gutterBottom>
                   Quality Score: {analysis.scores.quality}/10
@@ -128,7 +128,7 @@ export default function EquityDetail() {
               </Paper>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ p: 3, height: '100%' }}>
                 <Typography variant="h6" gutterBottom>
                   Momentum Score: {analysis.scores.momentum}/10
@@ -159,7 +159,7 @@ export default function EquityDetail() {
             {Object.entries(analysis.metrics).map(([key, value]) => {
               if (value === undefined || value === null) return null;
               return (
-                <Grid item xs={12} sm={6} md={3} key={key}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={key}>
                   <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -185,13 +185,13 @@ export default function EquityDetail() {
           <Paper sx={{ p: 3, mt: 4, bgcolor: '#f5f5f5' }}>
             <Typography variant="h6" gutterBottom>How is this calculated?</Typography>
             <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="subtitle2" fontWeight="bold">Quality Engine (Core)</Typography>
                     <Typography variant="body2">
                         Evaluates fundamental health. Points are awarded for ROE &gt; 15% (+3), Debt/Equity &lt; 0.5 (+3), Revenue Growth &gt; 10% (+2), and Reasonable P/E (+2). High quality stocks are ideal for your long-term Core portfolio.
                     </Typography>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="subtitle2" fontWeight="bold">Momentum Engine (Satellite)</Typography>
                     <Typography variant="body2">
                         Evaluates price action. Points are awarded if Price &gt; 50DMA (+3), Golden Cross (50 &gt; 200DMA) (+2), RSI is healthy (50-70) (+3), and Price is near 52-Week High (+2). High momentum stocks are candidates for your Satellite portfolio.
