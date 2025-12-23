@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import csv from 'csv-parser';
 import { readData, writeData } from '../utils/file-manager';
 import { resolveMemberId } from '../utils/interactive';
-import type { Holding } from '../../app/types';
+import type { Holding } from '@core/types';
 
 export const iiflCommand = new Command('iifl');
 

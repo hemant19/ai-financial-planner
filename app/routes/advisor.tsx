@@ -10,7 +10,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import PersonIcon from '@mui/icons-material/Person';
 import { getGenerativeModel, ChatSession } from "firebase/ai";
 import { ai } from '../firebase';
-import { DataService } from '../services/data.service';
+import { DataService } from '@core/services/data.service';
 import { useSelection } from '../context/SelectionContext';
 
 interface Message {

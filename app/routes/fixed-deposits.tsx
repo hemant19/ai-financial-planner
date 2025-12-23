@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
 import { useSelection } from '../context/SelectionContext';
-import { DataService } from '../services/data.service';
-import { FixedDeposit } from '../types';
+import { DataService } from '@core/services/data.service';
+import { FixedDeposit } from '@core/types';
 
 export default function FixedDeposits() {
   const { selectedMemberId } = useSelection();

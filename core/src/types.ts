@@ -69,33 +69,21 @@ export interface FixedDeposit {
   status: 'ACTIVE' | 'MATURED' | 'CLOSED';
 }
 
-export type AssetClass = 'EQUITY' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'REIT' | 'US_EQUITY';
+export type AssetClass = 'EQUITY' | 'DEBT' | 'COMMODITY' | 'REAL_ESTATE' | 'OTHER';
 
-export interface HoldingAnalysis {
-  scores: {
-    quality: number;   // 0-10
-    momentum: number;  // 0-10
-    total: number;     // 0-10 (Weighted average or sum)
-  };
-  verdict: 'BUY' | 'HOLD' | 'SELL' | 'ACCUMULATE' | 'TRIM' | 'WATCH';
-  signals: string[];   // ["Strong Uptrend", "Undervalued", "Overbought"]
-  metrics: {
-    roe?: number;
-    debtToEquity?: number;
-    peRatio?: number;
-    revenueGrowth?: number; // YoY
-    rsi?: number;
-    fiftyDMA?: number;
-    twoHundredDMA?: number;
-    fiftyTwoWeekHigh?: number;
-    fiftyTwoWeekLow?: number;
-  };
-}
+export type AssetCategory = 
+  | 'LARGECAP' | 'MIDCAP' | 'SMALLCAP' | 'MULTICAP' 
+  | 'FD' | 'CASH' | 'LIQUID_FUND' | 'ARBITRAGE_FUND' | 'DEBT_FUND' | 'BOND' 
+  | 'GOLD' | 'SILVER' 
+  | 'RESIDENTIAL' | 'COMMERCIAL' 
+  | 'INDEX_FUND' | 'ETF' | 'SECTOR_FUND' | 'OTHER';
 
 export interface Holding {
   id: string;
   accountId: string;
   assetClass: AssetClass;
+  assetCategory?: AssetCategory;
+  assetType?: 'DIRECT' | 'MUTUAL_FUND' | 'ETF' | 'SGB';
   symbol: string;
   isin?: string;
   name: string;
@@ -156,6 +144,7 @@ export interface AssetAggregates {
   indianEquities: number;
   usStocks: number;
   mutualFunds: number;
+  commodities: number;
   realEstate: number;
   total: number;
 }
@@ -168,10 +157,15 @@ export interface IDataService {
   getAccount(accountId: string): Promise<Account | null>;
   getFixedDeposits(accountId: string): Promise<FixedDeposit[]>;
   getHoldings(accountId: string): Promise<Holding[]>;
-  getHoldingsForMember(memberId: string | null, assetClass?: AssetClass): Promise<Holding[]>;
+  getHoldingsForMember(
+    memberId: string | null, 
+    assetClass?: AssetClass,
+    assetType?: 'DIRECT' | 'MUTUAL_FUND' | 'ETF' | 'SGB'
+  ): Promise<Holding[]>;
   getFixedDepositsForMember(memberId: string | null): Promise<FixedDeposit[]>;
   getRealEstate(memberId: string | null): Promise<RealEstate[]>;
   getAssetAggregates(memberId: string | null): Promise<AssetAggregates>;
+  getCategoryAggregates(memberId: string | null): Promise<{ label: string; value: number }[]>;
   calculateTotalAssets(memberId: string | null): Promise<number>;
   calculateLiabilities(memberId: string | null): Promise<number>;
   calculateNetWorth(memberId: string | null): Promise<number>;

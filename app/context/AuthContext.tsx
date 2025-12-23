@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { UserProfile } from '../types';
+import { UserProfile } from '@core/types';
 
 // Mock User Interface to replace Firebase User
 export interface User {

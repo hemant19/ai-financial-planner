@@ -1,4 +1,4 @@
-import { HoldingAnalysis } from '../../app/types';
+import { HoldingAnalysis } from '@core/types';
 
 /**
  * Calculates Simple Moving Average (SMA)

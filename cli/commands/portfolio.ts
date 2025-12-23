@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { DataService } from '../../app/services/data.service';
+import { DataService } from '@core/services/data.service';
 import { resolveMemberId } from '../utils/interactive';
 
 export const portfolioCommand = new Command('portfolio')

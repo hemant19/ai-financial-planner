@@ -31,9 +31,9 @@ import {
   AutoAwesome as AutoAwesomeIcon,
 } from '@mui/icons-material';
 import { SelectionProvider, useSelection } from '../context/SelectionContext';
-import { DataService } from '../services/data.service';
+import { DataService } from '@core/services/data.service';
 import { useAuth } from '../context/AuthContext';
-import { Member } from '../types';
+import { Member } from '@core/types';
 
 const drawerWidth = 240;
 

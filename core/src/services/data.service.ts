@@ -39,7 +39,11 @@ export class FixedDataService implements IDataService {
     return sampleData.holdings.find(h => h.id === id);
   }
 
-  async getHoldingsForMember(memberId: string | null, assetClass?: AssetClass): Promise<Holding[]> {
+  async getHoldingsForMember(
+    memberId: string | null, 
+    assetClass?: AssetClass,
+    assetType?: 'DIRECT' | 'MUTUAL_FUND' | 'ETF' | 'SGB'
+  ): Promise<Holding[]> {
     let accounts: Account[] = [];
     if (!memberId) {
       accounts = sampleData.accounts;
@@ -48,8 +52,12 @@ export class FixedDataService implements IDataService {
     }
     const accountIds = accounts.map(a => a.id);
     let holdings = sampleData.holdings.filter(h => accountIds.includes(h.accountId));
-    if (assetClass) {
+    
+    if (assetClass !== undefined) {
       holdings = holdings.filter(h => h.assetClass === assetClass);
+    }
+    if (assetType !== undefined) {
+      holdings = holdings.filter(h => h.assetType === assetType);
     }
     return holdings;
   }
@@ -90,15 +98,19 @@ export class FixedDataService implements IDataService {
       .reduce((acc, a) => acc + (a.currentBalance || 0), 0);
 
     const indianEquities = holdings
-      .filter(h => h.assetClass === 'EQUITY' && h.currency === 'INR')
+      .filter(h => h.assetClass === 'EQUITY' && h.currency === 'INR' && h.assetType === 'DIRECT')
       .reduce((acc, h) => acc + (h.quantity * (h.lastPrice || 0)), 0);
 
     const usStocks = holdings
-      .filter(h => h.assetClass === 'US_EQUITY' || (h.assetClass === 'EQUITY' && h.currency === 'USD'))
+      .filter(h => h.assetClass === 'EQUITY' && h.currency === 'USD' && h.assetType === 'DIRECT')
       .reduce((acc, h) => acc + (h.quantity * (h.lastPrice || 0) * this.USD_TO_INR), 0);
 
     const mutualFunds = holdings
-      .filter(h => h.assetClass === 'MUTUAL_FUND')
+      .filter(h => h.assetType === 'MUTUAL_FUND')
+      .reduce((acc, h) => acc + (h.quantity * (h.lastPrice || 0)), 0);
+
+    const commodities = holdings
+      .filter(h => h.assetClass === 'COMMODITY')
       .reduce((acc, h) => acc + (h.quantity * (h.lastPrice || 0)), 0);
 
     const fdValue = fixedDeposits.reduce((acc, fd) => acc + fd.principalAmount, 0);
@@ -111,8 +123,9 @@ export class FixedDataService implements IDataService {
       indianEquities,
       usStocks,
       mutualFunds,
+      commodities,
       realEstate: reValue,
-      total: bankBalance + fdValue + indianEquities + usStocks + mutualFunds + reValue
+      total: bankBalance + fdValue + indianEquities + usStocks + mutualFunds + commodities + reValue
     };
   }
 
@@ -140,6 +153,21 @@ export class FixedDataService implements IDataService {
         }
         return acc + change;
     }, 0);
+  }
+
+  async getCategoryAggregates(memberId: string | null): Promise<{ label: string, value: number }[]> {
+    const holdings = await this.getHoldingsForMember(memberId);
+    const map = new Map<string, number>();
+
+    holdings.forEach(h => {
+        const cat = h.assetCategory || 'OTHER';
+        const val = h.quantity * (h.lastPrice || 0) * (h.currency === 'USD' ? this.USD_TO_INR : 1);
+        map.set(cat, (map.get(cat) || 0) + val);
+    });
+
+    return Array.from(map.entries())
+        .map(([label, value]) => ({ label, value }))
+        .sort((a, b) => b.value - a.value);
   }
 
   async getPortfolioContext(memberId: string | null): Promise<string> {

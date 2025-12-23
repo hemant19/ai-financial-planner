@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Grid, Chip } from '@mui/material';
 import { Link } from 'react-router';
 import { useSelection } from '../context/SelectionContext';
-import { DataService } from '../services/data.service';
-import { Holding } from '../types';
+import { DataService } from '@core/services/data.service';
+import { Holding } from '@core/types';
 
 export default function USStocks() {
   const { selectedMemberId } = useSelection();
@@ -12,8 +12,8 @@ export default function USStocks() {
   React.useEffect(() => {
     const fetchHoldings = async () => {
       // Pass selectedMemberId (can be null for Family view) to the service
-      const data = await DataService.getHoldingsForMember(selectedMemberId, 'US_EQUITY');
-      setHoldings(data);
+      const data = await DataService.getHoldingsForMember(selectedMemberId, 'EQUITY', 'DIRECT');
+      setHoldings(data.filter(h => h.currency === 'USD'));
     };
     fetchHoldings();
   }, [selectedMemberId]);

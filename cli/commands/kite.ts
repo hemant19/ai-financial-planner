@@ -6,7 +6,7 @@ import http from 'http';
 import inquirer from 'inquirer';
 import { KiteConnect } from 'kiteconnect';
 import { readData, writeData } from '../utils/file-manager';
-import type { Holding } from '../../app/types';
+import type { Holding } from '@core/types';
 
 const TOKENS_PATH = path.resolve('cli/data/kite-tokens.json');
 

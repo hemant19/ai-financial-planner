@@ -6,8 +6,8 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { DataService } from '../services/data.service';
-import { Holding } from '../types';
+import { DataService } from '@core/services/data.service';
+import { Holding } from '@core/types';
 
 const MetricExplanation: Record<string, string> = {
   roe: "Return on Equity (ROE) measures a company's profitability. >15% is considered efficient.",
