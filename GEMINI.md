@@ -76,8 +76,15 @@ Located in `cli/utils/analyst.ts` (and partly in `core`), this engine computes t
 
 ## Conventions
 
+### UI & Styling
+*   **MUI v7 Grid:** This project uses the new `Grid` component (formerly Grid2). **NEVER use the deprecated `item` prop.**
+    *   **Old (Wrong):** `<Grid item xs={12} md={6}>`
+    *   **New (Correct):** `<Grid size={{ xs: 12, md: 6 }}>`
+*   **Material Design:** Follow Material Design 3 principles for UI/UX.
+*   **Consistency:** Use Material UI components (`@mui/material`) for all UI elements.
+
+### Data & Logic
 *   **Single Source of Truth:** All data modifications (CRUD) should go through `DataService` in `@core`. Do not write to the JSON file directly from UI components.
 *   **Type Safety:** Use the shared types from `@core/types.ts`. Avoid `any`.
-*   **UI Library:** Use Material UI components (`@mui/material`) for consistency.
 *   **Routing:** Follow React Router v7 conventions. New routes go in `app/routes.ts` or as files in `app/routes/`.
 *   **Firebase:** Used primarily for Authentication and the GenAI Advisor features.
