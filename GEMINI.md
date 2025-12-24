@@ -58,6 +58,11 @@ The project is structured as a monorepo-like workspace with three main layers:
 
 The CLI is the primary method for adding data to the system.
 
+**Prerequisite:** You must set the `ALPHAVANTAGE_API_KEY` environment variable to fetch market data.
+```bash
+export ALPHAVANTAGE_API_KEY=your_key_here
+```
+
 1.  **Ingest Data:**
     *   `npm run cli -- import kite sync` (Syncs directly from Zerodha)
     *   `npm run cli -- import iifl <path-to-csv>`
